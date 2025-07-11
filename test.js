@@ -1,6 +1,6 @@
 // const net = require('net');
 
-import { socketClientSendMsg } from './socket';
+import { socketClientSendMsg } from './socket.js';
 
 
 import net from 'node:net'
@@ -74,7 +74,7 @@ async function runTests() {
 
     let result;
     try {
-      result = await socketClientSendMsg();
+      result = await socketClientSendMsg('hello test!');
     } catch (err) {
       console.error(`❌ Test ${i + 1} errored:`, err.message);
       continue;

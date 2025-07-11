@@ -1,24 +1,34 @@
 import net from 'node:net';
 
-export function socketClientSendMsg(msg) {
-  const mySocket = new net.Socket();
-  mySocket.connect({ port: 1111 }, () => {
-    console.log('connected...');
-  });
+export async function isServerReplySame(msg) {
+  return await sendMsgGetReply(msg);
 
-  //Check if connected, then write msg
-  return mySocket
-    .on('connect', () => {
-      console.log('connection event emitted');
-    })
-    .on('ready', () => console.log('socket ready'))
-    .on('end', ()=> console.log('connection ended'))
-    .on('data', ()=>console.log('Data returned from client:', data))
-    .write(msg, (error) => {
-      if (error) return console.log('if there are errors:', error);
-    })
+  async function sendMsgGetReply(msg) {
+    const mySocket = new net.createConnection({ port: 1111 });
+    const originalMsg = msg;
+    console.log('original message:', originalMsg);
+    let serverReply;
 
+    //set encoding to read strings
+    mySocket.setEncoding('utf8');
+    //Check if connected, then write msg
+    mySocket
+      .on('connect', () => console.log('connection event emitted'))
+      .on('ready', () => console.log('socket ready'))
+      .on('end', () => console.log('connection ended'))
+      .on('error', (error) => console.log('error:', error))
+      .write(msg, (error) => {
+        console.log('sending message:', msg);
+        if (error) return console.log('if there are errors:', error);
+      });
 
+    mySocket.on('data', (data) => {
+      console.log('server reply:', data);
+      serverReply = data;
+      mySocket.destroy();
+    });
+
+    return serverReply === originalMsg;
+  }
 }
-console.log(socketClientSendMsg('hello'));
-// console.log('connectino written T/F: ',socketClient('hello'))
+console.log(isServerReplySame('hello'));
